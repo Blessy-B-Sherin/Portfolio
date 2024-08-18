@@ -943,7 +943,7 @@ backend services via RESTful APIs. </li>
         
       </div>
 
-      <form action="forms/contact.php" method="post" role="form" class="php-email-form mt-4">
+       <form id="contact-form" action="https://formspree.io/f/mpwajaeo" method="POST" class="php-email-form mt-4">
         <div class="row">
           <div class="col-md-6 form-group">
             <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" required>
@@ -959,7 +959,7 @@ backend services via RESTful APIs. </li>
           <textarea class="form-control" name="message" rows="5" placeholder="Message" required></textarea>
         </div>
         <div class="my-3">
-          <div class="loading">Loading</div>
+          <div class="loading">Loading...</div>
           <div class="error-message"></div>
           <div class="sent-message">Your message has been sent. Thank you!</div>
         </div>
@@ -988,7 +988,50 @@ backend services via RESTful APIs. </li>
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
   <script src="assets/vendor/php-email-form/validate.js"></script>
+<script>
+  document.getElementById('contact-form').addEventListener('submit', function(event) {
+    event.preventDefault();
 
+    const form = event.target;
+    const formData = new FormData(form);
+    const action = form.action;
+
+    // Show loading spinner
+    form.querySelector('.loading').classList.add('d-block');
+    form.querySelector('.error-message').classList.remove('d-block');
+    form.querySelector('.sent-message').classList.remove('d-block');
+
+    fetch(action, {
+      method: 'POST',
+      body: formData,
+      headers: { 'Accept': 'application/json' }
+    })
+    .then(response => {
+      if (response.ok) {
+        return response.json(); // Convert response to JSON if successful
+      } else {
+        return response.json().then(data => {
+          throw new Error(data.error || 'Form submission failed.');
+        });
+      }
+    })
+    .then(data => {
+      if (data.ok) {
+        form.querySelector('.loading').classList.remove('d-block');
+        form.querySelector('.sent-message').classList.add('d-block');
+        form.querySelector('.error-message').classList.remove('d-block');
+        form.reset();
+      } else {
+        throw new Error(data.message || 'Form submission failed.');
+      }
+    })
+    .catch(error => {
+      form.querySelector('.loading').classList.remove('d-block');
+      form.querySelector('.error-message').innerText = error.message;
+      form.querySelector('.error-message').classList.add('d-block');
+    });
+  });
+</script>
 </body>
 
 </html>
